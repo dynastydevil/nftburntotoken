@@ -1,0 +1,28 @@
+pragma solidity ^0.8.0;
+
+// Import the ERC721 and ERC20 interfaces
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+contract NFTBurner {
+    address private nftAddress;  // Address of the NFT contract
+    address private tokenAddress;  // Address of the token contract
+    
+    constructor(address _nftAddress, address _tokenAddress) {
+        nftAddress = _nftAddress;
+        tokenAddress = _tokenAddress;
+    }
+    
+    function burnNFT(uint256 tokenId) external {
+        // Transfer NFT ownership to this contract
+        IERC721(nftAddress).transferFrom(msg.sender, address(this), tokenId);
+        
+        // Burn the NFT
+        IERC721(nftAddress).burn(tokenId);
+        
+        // Transfer tokens to the burner's address
+        IERC20 token = IERC20(tokenAddress);
+        uint256 tokenBalance = token.balanceOf(address(this));
+        token.transfer(msg.sender, tokenBalance);
+    }
+}
